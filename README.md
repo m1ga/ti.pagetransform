@@ -1,3 +1,6 @@
+<img src="assets/demo.gif"/>
+
+
 ```xml
 <ScrollableView id="sv" cacheSize="10" module="ti.pagetransform">
    <View borderRadius="6" onTouchstart="touchStart" onTouchend="touchEnd" onTouchmove="touchMove" backgroundColor="#fff"><Label text="Test" color="#000"/></View>
