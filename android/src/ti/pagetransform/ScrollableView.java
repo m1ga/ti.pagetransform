@@ -4,6 +4,7 @@ package ti.pagetransform;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.os.Build;
 import android.os.Parcelable;
 import android.util.DisplayMetrics;
 import android.view.KeyEvent;
@@ -14,6 +15,8 @@ import android.view.ViewParent;
 import android.view.View.OnClickListener;
 import android.widget.FrameLayout;
 import android.widget.FrameLayout.LayoutParams;
+
+import androidx.annotation.RequiresApi;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 import androidx.viewpager.widget.ViewPager.SimpleOnPageChangeListener;
@@ -57,7 +60,58 @@ public class ScrollableView extends TiUIView {
         this.mContainer.addView(this.mPager, new LayoutParams(-1, -1));
         this.mPagingControl = this.buildPagingControl(activity);
         this.mContainer.addView(this.mPagingControl, new LayoutParams(-1, -1));
+
+        mPager.setClipChildren(false);
+        mPager.setClipToPadding(false);
+        mPager.setPageTransformer(true, new DepthPageTransformer());
+
         this.setNativeView(this.mContainer);
+    }
+
+    public class DepthPageTransformer implements ViewPager.PageTransformer {
+        private static final float MIN_SCALE = 0.75f;
+
+        @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+        public void transformPage(View view, float position) {
+            int pageWidth = view.getWidth();
+            int pageHeight = view.getHeight();
+
+            if (position < 0) {
+                // old pages
+                view.setAlpha(1f + position * 0.2f);
+                view.setTranslationX(pageWidth * -position);
+                view.setTranslationY(25f * position);
+                view.setScaleX(0.9f + position * 0.01f);
+                view.setScaleY(0.9f + position * 0.01f);
+                view.setTranslationZ(0.9f * position);
+
+            } else if (position == 0) {
+                // visible page
+                view.setTranslationX(pageWidth * -position);
+                view.setTranslationY(20f * position);
+                view.setScaleX(0.9f);
+                view.setScaleY(0.9f);
+                view.setTranslationZ(0.9f * position);
+
+            } else if (position <= 1) {
+                // next page
+                view.setScaleX(0.9f + (0.02f * position));
+                view.setScaleY(0.9f + (0.02f * position));
+                view.setTranslationX(pageWidth * -position);
+                view.setTranslationY(pageHeight * position - 150f * position );
+                view.setTranslationZ(2f);
+            } else {
+                // all other pages
+                view.setScaleX(0.92f);
+                view.setScaleY(0.92f);
+                view.setTranslationX(pageWidth * -position);
+                view.setTranslationZ(2f);
+
+                // keep at stack level
+                view.setTranslationY(pageHeight * 1f - 150f * 1f );
+
+            }
+        }
     }
 
     private ViewPager buildViewPager(Context context, ti.modules.titanium.ui.widget.TiUIScrollableView.ViewPagerAdapter adapter) {

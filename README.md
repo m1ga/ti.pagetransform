@@ -12,15 +12,7 @@
 ```
 
 ```js
-var pt = require("ti.pagetransform");
 var tX = 0;
-
-
-function onOpen(e) {
-	pt.createStack({
-		scrollableView: $.sv
-	});
-}
 
 function touchMove(e){
 	e.source.translationX = tX  - e.x;
